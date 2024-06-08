@@ -6,10 +6,11 @@ import pandas as pd
 # The user interface
 class MyGui:
     def __init__(self, master):
-        emails = ""
+        emails = []
 
         def get_emails(event):
-            emails = emailsText.get("1.0",'end-1c')
+            emails = list(emailsText.get("1.0",'end-1c').split("\n"))
+
             print("TEEEEEEEEEEEEEEEEEEEEEST", emails, "SUPPPPPPPPPPPPPPPEEEEEEEEEEERRRRRRRR")
         
         self.root = master
@@ -23,8 +24,8 @@ class MyGui:
         xFrame.columnconfigure(0, weight=1)
         xFrame.columnconfigure(1,weight=1)
 
-        namesText = tk.Text(xFrame)
-        emailsText = tk.Text(xFrame)
+        namesText = tk.Listbox(xFrame)
+        emailsText = tk.Listbox(xFrame)
         openFileButton = tk.Button(self.root, text="Open Excel file", command=lambda:self.chooseFile(namesText, emailsText))
         openFileButton.pack()
 
@@ -39,9 +40,6 @@ class MyGui:
         sendEmailsButton = tk.Button(self.root, text="Send Emails", command=lambda:self.send_emails(emails, subjects, bodies))
         sendEmailsButton.pack()
 
-
-        
-
     # Let the user upload an Excel file with columns for name, email
     def chooseFile(self, names_text_widget, emails_text_widget): 
         filename = askopenfile()
@@ -52,12 +50,12 @@ class MyGui:
         email_list = pd.read_excel(filename.name)
         print("Email list = ", email_list)
 
-        names = email_list['name']
+        names = email_list['name'].to_list()
         print("The names we identified in the file are:\n", names)
         print()
         change_text(names_text_widget, names)
         
-        emails = email_list['email']
+        emails = email_list['email'].to_list()
         print("The emails we identified are:\n", emails)
         print()
         change_text(emails_text_widget, emails)
@@ -79,9 +77,10 @@ class MyGui:
 
 def change_text(text_widget, new_text):
     # Delete the current content for the text widget
-    text_widget.delete('1.0', 'end')
+    text_widget.delete("0", "end")
     # Insert the new text for the text widget
-    text_widget.insert('1.0', new_text)
+    for word in new_text:
+        text_widget.insert('0', word)
 
 
 
