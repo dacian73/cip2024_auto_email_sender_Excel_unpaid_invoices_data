@@ -3,10 +3,12 @@ from tkinter.filedialog import askopenfile
 import tkinter as tk
 import pandas as pd
 
+emails = []
+names = []
 # The user interface
 class MyGui:
     def __init__(self, master):
-        emails = []
+        
         self.root = master
         self.root.geometry("600x600")
 
@@ -28,12 +30,12 @@ class MyGui:
         xFrame.pack()
 
         subjects = ["subject1","subject2","subject3"]
-        bodies = 0
+        bodies = ["f","s","a"]
 
         for i in range(len(emails)):
-            bodies[i] = namesList[i] + " ai o factură neplătită"
+            bodies[i] = names[i] + " ai o factură neplătită"
 
-        sendEmailsButton = tk.Button(self.root, text="Send Emails", command=lambda:self.send_emails(emails, subjects, bodies))
+        sendEmailsButton = tk.Button(self.root, text="Send Emails", command=self.on_send_emails_button_click)
         sendEmailsButton.pack()
 
     # Let the user upload an Excel file with columns for name, email
@@ -46,24 +48,29 @@ class MyGui:
         email_list = pd.read_excel(filename.name)
         print("Email list = ", email_list)
 
+        global names 
         names = email_list['name'].to_list()
         print("The names we identified in the file are:\n", names)
         print()
         change_text(names_list_widget, names)
         
+        global emails
         emails = email_list['email'].to_list()
         print("The emails we identified are:\n", emails)
         print()
         change_text(emails_list_widget, emails)
 
-    def send_emails(self, emails, subjects, bodies):
-        outlook = win32.Dispatch('Outlook.Application')
+        
+
+    def send_emails(self, subjects, bodies):
+        
+        #outlook = win32.Dispatch('Outlook.Application')
         for i in range(len(emails)):
             # for every record create an email
-            mail = outlook.CreateItem(0)
-            mail.To = emails[i]
-            mail.Subject = subjects[i]
-            mail.Body = bodies[i]
+         #   mail = outlook.CreateItem(0)
+          #  mail.To = emails[i]
+           # mail.Subject = subjects[i]
+            #mail.Body = bodies[i]
 
             print("For the item number", i, "we have the following email")
             print(emails[i])
@@ -74,6 +81,13 @@ class MyGui:
  
     # sending the email
            # mail.Send()
+    
+    def on_send_emails_button_click(self):
+        subjects = ["subject1", "subject2", "subject3"]
+        bodies = ["f", "s", "a"]
+        for i, name in enumerate(names):
+            bodies[i] = name + " ai o factură neplătită"
+        self.send_emails(subjects, bodies)
 
 def change_text(text_widget, new_text):
     # Delete the current content for the text widget
