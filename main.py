@@ -3,8 +3,8 @@ from tkinter.filedialog import askopenfile
 import tkinter as tk
 import pandas as pd
 
-emails = []
-names = []
+data = []
+
 global body_template 
 body_template = ["Hello, ", "$name", "\n", "We want to inform you that you have an unpaid invoice with our company. You can find the details of outstanding payment bellow:"]
 # The user interface
@@ -50,14 +50,17 @@ class MyGui:
         xFrame = tk.Frame(self.root)
         xFrame.columnconfigure(0, weight=1)
         xFrame.columnconfigure(1,weight=1)
+        xFrame.columnconfigure(2,weight=1)
 
         namesListBox = tk.Listbox(xFrame)
         emailsListBox = tk.Listbox(xFrame)
-        openFileButton = tk.Button(self.root, text="Open Excel file", command=lambda:self.chooseFile(namesListBox, emailsListBox))
+        sumsListBox = tk.Listbox(xFrame)
+        openFileButton = tk.Button(self.root, text="Open Excel file", command=lambda:self.chooseFile(namesListBox, emailsListBox, sumsListBox))
         openFileButton.pack()
 
         namesListBox.grid(row=0, column =0, sticky= tk.W+tk.E)
         emailsListBox.grid(row=0, column =1, sticky= tk.W+tk.E)
+        sumsListBox.grid(row=0, column =2, sticky= tk.W+tk.E)
         xFrame.pack()
 
         sendEmailsButton = tk.Button(self.root, text="Send Emails", command=self.on_send_emails_button_click)
@@ -66,7 +69,7 @@ class MyGui:
 
 
     # Let the user upload an Excel file with columns for name, email
-    def chooseFile(self, names_listbox, emails_listbox): 
+    def chooseFile(self, names_listbox, emails_listbox, sums_listbox): 
         filename = askopenfile()
         print("We are attempting to read the file: \n", filename)
         print()
@@ -75,32 +78,56 @@ class MyGui:
         email_list = pd.read_excel(filename.name)
         print("Email list = ", email_list)
 
-        global names 
+        sums = email_list['sum'].to_list()
+
         names = email_list['name'].to_list()
+
+        emails = email_list['email'].to_list()
+        names_copy = []
+
+        global data
+        for i in range(len(names)):
+            if names[i] in names_copy:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!We identified a duplicate with name =", names[i])
+                print("the index is = ", next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None))
+                data[next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None)].update({"sums": 999999})
+                print(data[0])
+            else:
+                names_copy.append(names[i])
+                data.append({"name":names[i], "email":emails[i], "sums":sums[i]})
+
+        sums = [ value["sums"] for value in data ]
+        names = [ value["name"] for value in data ]
+        emails = [ value["email"] for value in data ]
+
         print("The names we identified in the file are:\n", names)
         print()
         change_text(names_listbox, names)
         
-        global emails
-        emails = email_list['email'].to_list()
+
         print("The emails we identified are:\n", emails)
         print()
         change_text(emails_listbox, emails)
+
+        print("The sums we identified are:\n", sums)
+        print()
+        change_text(sums_listbox, sums)
 
         
 
     def send_emails(self, subjects, bodies):
         
-        #outlook = win32.Dispatch('Outlook.Application')
-        for i in range(len(emails)):
+        outlook = win32.Dispatch('Outlook.Application')
+        for i in range(len(data)):
             # for every record create an email
-         #   mail = outlook.CreateItem(0)
-          #  mail.To = emails[i]
-           # mail.Subject = subjects[i]
-            #mail.Body = bodies[i]
+            mail = outlook.CreateItem(0)
+            mail.To = data[i]["email"]
+            mail.Subject = subjects[i]
+            mail.Body = bodies[i]
 
+            print()
             print("For the item number", i, "we have the following email")
-            print(emails[i])
+            print(data[i]["email"])
             print()
             print(subjects[i])
             print()
@@ -111,17 +138,17 @@ class MyGui:
     
     def on_send_emails_button_click(self):
         # Create lists for email subjects and bodies with the same number of elements as the emails list
-        subjects = ["Unpaid Invoice Notification" for i in range(len(emails))]
-        bodies = ["" for i in range(len(emails))]
+        subjects = ["Unpaid Invoice Notification" for i in range(len(data))]
+        bodies = ["" for i in range(len(data))]
 
         # Populate the lists with subjects and bodies as needed
-        for i, name in enumerate(names):
+        for i, client in enumerate(data):
 
             # Create an email body using the template and replacing the name where needed
             body = ""
             for sequence in body_template:
                 if sequence == "$name ":
-                    body = body + name
+                    body = body + client["name"] + " "
                 else:
                     body = body+sequence
             
