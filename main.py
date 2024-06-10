@@ -7,12 +7,6 @@ import pandas as pd
 class MyGui:
     def __init__(self, master):
         emails = []
-
-        def get_emails(event):
-            emails = list(emailsText.get("1.0",'end-1c').split("\n"))
-
-            print("TEEEEEEEEEEEEEEEEEEEEEST", emails, "SUPPPPPPPPPPPPPPPEEEEEEEEEEERRRRRRRR")
-        
         self.root = master
         self.root.geometry("600x600")
 
@@ -24,24 +18,26 @@ class MyGui:
         xFrame.columnconfigure(0, weight=1)
         xFrame.columnconfigure(1,weight=1)
 
-        namesText = tk.Listbox(xFrame)
-        emailsText = tk.Listbox(xFrame)
-        openFileButton = tk.Button(self.root, text="Open Excel file", command=lambda:self.chooseFile(namesText, emailsText))
+        namesList = tk.Listbox(xFrame)
+        emailsList = tk.Listbox(xFrame)
+        openFileButton = tk.Button(self.root, text="Open Excel file", command=lambda:self.chooseFile(namesList, emailsList))
         openFileButton.pack()
 
-     
-
-        namesText.grid(row=0, column =0, sticky= tk.W+tk.E)
-        emailsText.grid(row=0, column =1, sticky= tk.W+tk.E)
+        namesList.grid(row=0, column =0, sticky= tk.W+tk.E)
+        emailsList.grid(row=0, column =1, sticky= tk.W+tk.E)
         xFrame.pack()
 
-        emailsText.bind('<KeyPress>', get_emails)
+        subjects = ["subject1","subject2","subject3"]
+        bodies = 0
+
+        for i in range(len(emails)):
+            bodies[i] = namesList[i] + " ai o factură neplătită"
 
         sendEmailsButton = tk.Button(self.root, text="Send Emails", command=lambda:self.send_emails(emails, subjects, bodies))
         sendEmailsButton.pack()
 
     # Let the user upload an Excel file with columns for name, email
-    def chooseFile(self, names_text_widget, emails_text_widget): 
+    def chooseFile(self, names_list_widget, emails_list_widget): 
         filename = askopenfile()
         print("We are attempting to read the file: \n", filename)
         print()
@@ -53,27 +49,31 @@ class MyGui:
         names = email_list['name'].to_list()
         print("The names we identified in the file are:\n", names)
         print()
-        change_text(names_text_widget, names)
+        change_text(names_list_widget, names)
         
         emails = email_list['email'].to_list()
         print("The emails we identified are:\n", emails)
         print()
-        change_text(emails_text_widget, emails)
+        change_text(emails_list_widget, emails)
 
-    def send_emails(emails, subjects, bodies):
+    def send_emails(self, emails, subjects, bodies):
         outlook = win32.Dispatch('Outlook.Application')
- 
-
         for i in range(len(emails)):
- 
-    # for every record create an email
+            # for every record create an email
             mail = outlook.CreateItem(0)
             mail.To = emails[i]
             mail.Subject = subjects[i]
             mail.Body = bodies[i]
+
+            print("For the item number", i, "we have the following email")
+            print(emails[i])
+            print()
+            print(subjects[i])
+            print()
+            print(bodies[i])
  
     # sending the email
-            mail.Send()
+           # mail.Send()
 
 def change_text(text_widget, new_text):
     # Delete the current content for the text widget
