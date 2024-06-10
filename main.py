@@ -75,28 +75,30 @@ class MyGui:
         print()
 
         
-        email_list = pd.read_excel(filename.name)
-        print("Email list = ", email_list)
+        input_from_file = pd.read_excel(filename.name)
+        print("Email list = ", input_from_file)
 
-        sums = email_list['sum'].to_list()
+        sums = input_from_file['sum']
 
-        names = email_list['name'].to_list()
+        names = input_from_file['name'].to_list()
 
-        emails = email_list['email'].to_list()
+        emails = input_from_file['email'].to_list()
         names_copy = []
 
         global data
+
         for i in range(len(names)):
             if names[i] in names_copy:
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!We identified a duplicate with name =", names[i])
-                print("the index is = ", next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None))
-                data[next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None)].update({"sums": 999999})
-                print(data[0])
+                index = next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None)
+                print("the index is =", index)
+                print("data[index]=", data[index])
+                data[index].get('invoices').append({'sum':888})
             else:
                 names_copy.append(names[i])
-                data.append({"name":names[i], "email":emails[i], "sums":sums[i]})
+                data.append({"name":names[i], "email":emails[i], "invoices":[{'sum':sums[i]}]})
 
-        sums = [ value["sums"] for value in data ]
+        invoices = [ value["invoices"] for value in data ]
         names = [ value["name"] for value in data ]
         emails = [ value["email"] for value in data ]
 
@@ -109,9 +111,9 @@ class MyGui:
         print()
         change_text(emails_listbox, emails)
 
-        print("The sums we identified are:\n", sums)
+        print("The invoices we identified are:\n", invoices)
         print()
-        change_text(sums_listbox, sums)
+        change_text(sums_listbox, invoices)
 
         
 
