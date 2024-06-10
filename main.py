@@ -33,10 +33,19 @@ class MyGui:
                     displayable_body_template = displayable_body_template+sequence
 
         # TODO, change the body template when the text in the templateText widget changes
+        def update_body_template(event):
+            updated_text = templateText.get("1.0", tk.END)
+            global body_template
+            body_template = [""]
+            print(updated_text)
+            for sequence in updated_text.split():
+                body_template.append(sequence + " ")
+            print("AICI", body_template)
+            event.widget.edit_modified(False)
 
         templateText.insert("end-1c", displayable_body_template)
         templateText.pack(padx=10, pady=10)
-        templateText.bind('<KeyPress>', update_body_template(templateText))
+        templateText.bind('<<Modified>>', update_body_template)
 
         xFrame = tk.Frame(self.root)
         xFrame.columnconfigure(0, weight=1)
@@ -125,14 +134,6 @@ def change_text(text_widget, new_text):
     # Insert the new text for the text widget
     for word in new_text:
         text_widget.insert('0', word)
-        
-def update_body_template(text_widget):
-    global body_template
-    body_template = [""]
-    print(text_widget.get("1.0",'end-1c'))
-    for sequence in text_widget.get("1.0",'end-1c').split():
-        body_template.append(sequence + " ")
-    print("AICI", body_template)
 
 
 def main():
