@@ -5,14 +5,24 @@ import pandas as pd
 
 data = []
 
-global body_template 
-body_template = ["Hello, ", "$name", "\n", "We want to inform you that you have an unpaid invoice with our company. You can find the details of outstanding payment bellow:"]
+global body_template
+
+body_template = ["    Hello, ", "$name", "\n", "We want to inform you that you have an unpaid invoice with our company. You can find the details of outstanding payment bellow:\n", "$invoices"]
 # The user interface
 class MyGui:
     def __init__(self, master):
         
         self.root = master
         self.root.geometry("600x600")
+        self.root.title("Email Sender app - CIP2024 project")
+        self.root.iconbitmap("icon.ico")
+
+        # Menu Bar
+        self.menubar = tk.Menu(self.root)
+        self.filemenu=tk.Menu(self.menubar, tearoff=0)
+        self.filemenu.add_command(label="Exit", command=self.root.destroy)
+        self.menubar.add_cascade(menu=self.filemenu, label="File")
+        self.root.config(menu=self.menubar)
 
         # Header
         header = tk.Label(self.root, text="Bulk email sender", font=("Arial", 18))
@@ -24,15 +34,17 @@ class MyGui:
         editTemplateLabel = tk.Label(self.root, text="You can edit the template bellow. you need to write $name instead of the client name.", font=("Arial", 8))
         editTemplateLabel.pack()
 
-        templateText = tk.Text(self.root, font=("Arial", 10), height=3)
+        templateText = tk.Text(self.root, font=("Arial", 10), height=10)
         displayable_body_template = ""
         for sequence in body_template:
                 if sequence == "$name":
                     displayable_body_template = displayable_body_template + "$name"
+                elif sequence == "$invoices":
+                    displayable_body_template = displayable_body_template + "$invoices"
                 else:
                     displayable_body_template = displayable_body_template+sequence
 
-        # TODO, change the body template when the text in the templateText widget changes
+        # Change the body template when the text in the templateText widget changes
         def update_body_template(event):
             updated_text = templateText.get("1.0", tk.END)
             global body_template
@@ -65,6 +77,19 @@ class MyGui:
 
         sendEmailsButton = tk.Button(self.root, text="Send Emails", command=self.on_send_emails_button_click)
         sendEmailsButton.pack()
+
+        helpButton = tk.Button(self.root, text="About", command=self.helpPage)
+        helpButton.pack()
+        
+    def helpPage(self):
+        # Create a tkinter window for "About" info
+        win=tk.Tk()
+        win.geometry("600x400")
+        label = tk.Label(win, text= "About the app! ",font=('Arial bold', 18)).pack(pady=20)
+        label = tk.Label(win, text= "This app was created by dacian73 for the Code in Place 2024 final project.\nThe sourcecode is available at https://github.com/dacian73 ",font=('Arial', 12)).pack(pady=20)
+        #Make the window jump above all
+        win.attributes('-topmost',True)
+        win.mainloop()
     
 
 
@@ -99,10 +124,10 @@ class MyGui:
                 index = next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None)
                 print("the index is =", index)
                 print("data[index]=", data[index])
-                data[index].get('invoices').append({"invoice_id": invoice_ids[i],"sum":sums[i], "dates": dates[i]})
+                data[index].get('invoices').append({"invoice_id": invoice_ids[i],"sum":sums[i], "date": dates[i]})
             else:
                 names_copy.append(names[i])
-                data.append({"client_id": client_ids[i],"name":names[i], "email":emails[i], "invoices":[{"invoice_id": invoice_ids[i],"sum":sums[i], "dates": dates[i]}]})
+                data.append({"client_id": client_ids[i],"name":names[i], "email":emails[i], "invoices":[{"invoice_id": invoice_ids[i],"sum":sums[i], "date": dates[i]}]})
 
         invoices = [ value["invoices"] for value in data ]
         names = [ value["name"] for value in data ]
@@ -119,7 +144,13 @@ class MyGui:
 
         print("The invoices we identified are:\n", invoices)
         print()
-        change_text(sums_listbox, invoices)
+        displayabe_invoices = []
+        for all_user_invoices in invoices:
+            one_user_invoices = ""
+            for invoice in all_user_invoices:
+                one_user_invoices = one_user_invoices + "Invoice number " + str(invoice["invoice_id"]) + " for " + str(invoice["sum"]) + ". "
+            displayabe_invoices.append(one_user_invoices)
+        change_text(sums_listbox, displayabe_invoices)
 
         
 
@@ -152,11 +183,16 @@ class MyGui:
         # Populate the lists with subjects and bodies as needed
         for i, client in enumerate(data):
 
-            # Create an email body using the template and replacing the name where needed
+            # Create an email body using the template and replacing the name and invoice data where needed
             body = ""
             for sequence in body_template:
                 if sequence == "$name ":
                     body = body + client["name"] + " "
+                elif sequence == "$invoices ":
+                    displayable_invoices = ""
+                    for invoice in client["invoices"]:
+                        displayable_invoices = displayable_invoices + "\nInvoice number " + str(invoice["invoice_id"]) + " for " + str(invoice["sum"]) + "$" + " with due date " + str(invoice["date"].date())
+                    body = body + displayable_invoices + " "
                 else:
                     body = body+sequence
             
