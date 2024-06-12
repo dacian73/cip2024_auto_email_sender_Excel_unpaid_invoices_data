@@ -1,17 +1,21 @@
+from tkinter import simpledialog
 import win32com.client as win32
-from tkinter.filedialog import askopenfile
+from tkinter.filedialog import askopenfile, askopenfilename, asksaveasfile
 import tkinter as tk
 import pandas as pd
 
 data = []
-
 global body_template
 
-body_template = ["    Hello, ", "$name", "\n", "We want to inform you that you have an unpaid invoice with our company. You can find the details of outstanding payment bellow:\n", "$invoices"]
+# The default template for the email is loaded from a file
+file = open('default_template', 'r')
+body_template = file.read()
+
 # The user interface
 class MyGui:
     def __init__(self, master):
         
+        # Tkinter window details
         self.root = master
         self.root.geometry("600x600")
         self.root.title("Email Sender app - CIP2024 project")
@@ -22,19 +26,23 @@ class MyGui:
         self.filemenu=tk.Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="Exit", command=self.root.destroy)
         self.menubar.add_cascade(menu=self.filemenu, label="File")
+        self.helpmenu=tk.Menu(self.menubar, tearoff=0)
+        self.helpmenu.add_command(label="About", command=self.helpPage)
+        self.menubar.add_cascade(menu=self.helpmenu, label="Help")
         self.root.config(menu=self.menubar)
 
         # Header
         header = tk.Label(self.root, text="Bulk email sender", font=("Arial", 18))
         header.pack(padx=20, pady=20)
-
+        # Label: Email Template
         templateLabel = tk.Label(self.root, text="Email Template", font=("Arial", 12))
         templateLabel.pack()
-
+        # Email template instructions
         editTemplateLabel = tk.Label(self.root, text="You can edit the template bellow. you need to write $name instead of the client name.", font=("Arial", 8))
         editTemplateLabel.pack()
-
+        # Text widget with the email template
         templateText = tk.Text(self.root, font=("Arial", 10), height=10)
+        # Transforming the list body_template into a more readable string called displayable_body_template
         displayable_body_template = ""
         for sequence in body_template:
                 if sequence == "$name":
@@ -43,48 +51,117 @@ class MyGui:
                     displayable_body_template = displayable_body_template + "$invoices"
                 else:
                     displayable_body_template = displayable_body_template+sequence
-
+        # Using displayable_body_template as text for the templateText widget
+        templateText.insert("end-1c", displayable_body_template)
+        templateText.pack(padx=10, pady=10)
         # Change the body template when the text in the templateText widget changes
         def update_body_template(event):
             updated_text = templateText.get("1.0", tk.END)
             global body_template
             body_template = [""]
-            print(updated_text)
             for sequence in updated_text.split():
                 body_template.append(sequence + " ")
-            print("AICI", body_template)
             event.widget.edit_modified(False)
-
-        templateText.insert("end-1c", displayable_body_template)
-        templateText.pack(padx=10, pady=10)
+        # Binding templateText, so that body_template gets updated each time it is modified
         templateText.bind('<<Modified>>', update_body_template)
 
-        xFrame = tk.Frame(self.root)
-        xFrame.columnconfigure(0, weight=1)
-        xFrame.columnconfigure(1,weight=1)
-        xFrame.columnconfigure(2,weight=1)
+        # Loading a template
+        def load_template():
+            filename = askopenfilename()
+            if filename:
+                try:
+                    with open(filename, 'r') as f:
+                        data = f.read()
+                        templateText.delete("1.0", "end")  # Clear existing content
+                        templateText.insert("end", data)  # Insert new data
+                except FileNotFoundError:
+                    print(f"File '{filename}' not found.")
+        
+        # Buttons for saving or loading templates
+        buttonFrame = tk.Frame(self.root)
+        buttonFrame.columnconfigure(0, weight=1)
+        buttonFrame.columnconfigure(1,weight=1)
+        buttonFrame.columnconfigure(2,weight=1)
 
-        namesListBox = tk.Listbox(xFrame)
-        emailsListBox = tk.Listbox(xFrame)
-        sumsListBox = tk.Listbox(xFrame)
+        saveButton = tk.Button(buttonFrame, text="Save Template", command=self.save_template)
+        saveAsDefaultButton = tk.Button(buttonFrame, text="Save as Default Template", command=self.save_default_template)
+        loadButton = tk.Button(buttonFrame, text="Load Template", command=load_template)
+        saveButton.grid(row=0, column =0, sticky= tk.W+tk.E)
+        saveAsDefaultButton.grid(row=0, column =1, sticky= tk.W+tk.E)
+        loadButton.grid(row=0, column =2, sticky= tk.W+tk.E)
+
+        buttonFrame.pack()
+
+        # Button to load data from excel file
         openFileButton = tk.Button(self.root, text="Open Excel file", command=lambda:self.chooseFile(namesListBox, emailsListBox, sumsListBox))
         openFileButton.pack()
+
+        # ListBox for data about clients and their invoices
+        dataFrame = tk.Frame(self.root)
+        dataFrame.columnconfigure(0, weight=1)
+        dataFrame.columnconfigure(1,weight=1)
+        dataFrame.columnconfigure(2,weight=1)
+
+        namesListBox = tk.Listbox(dataFrame)
+        emailsListBox = tk.Listbox(dataFrame)
+        sumsListBox = tk.Listbox(dataFrame)
 
         namesListBox.grid(row=0, column =0, sticky= tk.W+tk.E)
         emailsListBox.grid(row=0, column =1, sticky= tk.W+tk.E)
         sumsListBox.grid(row=0, column =2, sticky= tk.W+tk.E)
-        xFrame.pack()
+        dataFrame.pack()
 
+        # Buttons to save or load list
+        saveListFrame = tk.Frame(self.root)
+        saveListFrame.columnconfigure(0, weight=1)
+        saveListFrame.columnconfigure(1, weight=1)
+
+        saveListButton = tk.Button(saveListFrame, text="Save List", command=self.save_list)
+        loadListButton = tk.Button(saveListFrame, text="Load List", command=self.load_list)
+        saveListButton.grid(row=0, column =0, sticky= tk.W+tk.E)
+        loadListButton.grid(row=0, column =1, sticky= tk.W+tk.E)
+        saveListFrame.pack()
+
+
+
+        # Button to send emails
         sendEmailsButton = tk.Button(self.root, text="Send Emails", command=self.on_send_emails_button_click)
         sendEmailsButton.pack()
 
-        helpButton = tk.Button(self.root, text="About", command=self.helpPage)
-        helpButton.pack()
+    def save_template(self):
+        file = asksaveasfile(initialfile="template")
+        displayable_body_template = ""
+        for sequence in body_template:
+                if sequence == "$name":
+                    displayable_body_template = displayable_body_template + "$name"
+                elif sequence == "$invoices":
+                    displayable_body_template = displayable_body_template + "$invoices"
+                else:
+                    displayable_body_template = displayable_body_template+sequence
+        file.write(str(displayable_body_template))
+    
+    def save_default_template(self):
+        file = open("default_template", 'w')
+        file.writelines(body_template)
+
+    def save_list(self):
+        filename = simpledialog.askstring(title="Saving...",
+                                  prompt="Write a name for the file you want to save")
+        file = open(filename, 'w')
+        file.writelines(data)
+
+    def load_list(self):
+        global data
+        file = open('default_template', 'r')
+        data = file.read()
         
     def helpPage(self):
         # Create a tkinter window for "About" info
         win=tk.Tk()
         win.geometry("600x400")
+        win.title("About this app")
+        win.iconbitmap("about_icon.ico")
+
         label = tk.Label(win, text= "About the app! ",font=('Arial bold', 18)).pack(pady=20)
         label = tk.Label(win, text= "This app was created by dacian73 for the Code in Place 2024 final project.\nThe sourcecode is available at https://github.com/dacian73 ",font=('Arial', 12)).pack(pady=20)
         #Make the window jump above all
@@ -172,7 +249,7 @@ class MyGui:
             print()
             print(bodies[i])
  
-    # sending the email
+    # TODO sending the email
            # mail.Send()
     
     def on_send_emails_button_click(self):

@@ -5,7 +5,8 @@ The app will allow users to send personalized emails to a large list of recipien
 
 ## Libraries Used
 - **Tkinter**: For the GUI
-- **openpyxl**: For opening Excel files
+- **pandas**: For getting data from Excel files
+- **win32com.client**: For sending emails with Outlook
 
 ## Input
 The user can choose an Excel file with columns named "name", "email", and "sum". The file can contain multiple rows, including multiple rows with the same "name" and "email", but with different invoice sums and dates.
@@ -47,3 +48,14 @@ Explanation:
  There is a predefined email body that is shown on a Text widget. The email body is editable. The user can write whathever he wants and he can use $name in place of the client name. The email body is stored in a global variable called body_template
 
  When pressing the send button, the app creates the emails and sends them.
+
+ ## Further improvments
+ There are a large number of potential improvements that could make this app more useful. Here are some of them:
+ - making sure to handle most common errors
+ - offer the option to use smtp instead of outlook
+ - allow the user to add or delete clients from the imported lists
+ - give the option to add pdf attachments with the invoices 
+ - allow for custom email signature, that can be saved
+ - make the number of columns dinamic, the user being able to decide what information he wants to use or see
+ - give the user the option to write the names of the column headers he is interested in (instead of forcing him to use "name", "email", "invoice id" etc.)
+
