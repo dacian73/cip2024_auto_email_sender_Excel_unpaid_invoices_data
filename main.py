@@ -78,7 +78,13 @@ class MyGui:
         input_from_file = pd.read_excel(filename.name)
         print("Email list = ", input_from_file)
 
+        client_ids = input_from_file['client id']
+
+        invoice_ids = input_from_file['invoice id']
+
         sums = input_from_file['sum']
+
+        dates = input_from_file['due date']
 
         names = input_from_file['name'].to_list()
 
@@ -89,14 +95,14 @@ class MyGui:
 
         for i in range(len(names)):
             if names[i] in names_copy:
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!We identified a duplicate with name =", names[i])
+                print("We identified another invoice with client id =", client_ids[i])
                 index = next((index for (index, d) in enumerate(data) if d["name"] == names[i]), None)
                 print("the index is =", index)
                 print("data[index]=", data[index])
-                data[index].get('invoices').append({'sum':888})
+                data[index].get('invoices').append({"invoice_id": invoice_ids[i],"sum":sums[i], "dates": dates[i]})
             else:
                 names_copy.append(names[i])
-                data.append({"name":names[i], "email":emails[i], "invoices":[{'sum':sums[i]}]})
+                data.append({"client_id": client_ids[i],"name":names[i], "email":emails[i], "invoices":[{"invoice_id": invoice_ids[i],"sum":sums[i], "dates": dates[i]}]})
 
         invoices = [ value["invoices"] for value in data ]
         names = [ value["name"] for value in data ]

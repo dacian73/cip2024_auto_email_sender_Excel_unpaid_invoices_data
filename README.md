@@ -19,10 +19,12 @@ The user needs to choose a file from which the app will import data and store it
 The structure of the data variable
 data = [
     {
-        "name" = name, 
-        "email" = email, 
+        "client_id" = client_id1
+        "name" = name1, 
+        "email" = email1, 
         "invoices" = [
-            {"sum":sum1, "date":date1}, {"sum":sum2, "date"=date2},
+            {"invoice_number": invoice_number1, "sum":sum1, "date":date1}, 
+            {"invoice_number": invoice_number2, "sum":sum2, "date"=date2},
             ...
         ]
     },
@@ -31,12 +33,14 @@ data = [
 Explanation:
  - data is a list of dictionaries
     - Each dictionary inside the data variable contains the keys:
-        - "name"  - String value
-        - "email" - String value
+        - "client_id" - String
+        - "name"  - String
+        - "email" - String
         - "invoices" - list
             - The invoices list contains the details of each invoice from a client, the information being stored in a dictionary with the keys:
-                - "sum" - Stirng value
-                - "date" - String value
+                - "invoice_id" - String
+                - "sum" - String
+                - "date" - String
 
 
 
