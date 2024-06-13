@@ -7,8 +7,9 @@ import pickle
 
 # Imports from project modules
 from constants import *
-from help import helpPage
+from help_window import helpPage
 from helper_functions import load_default_template, save_default_template, save_list, save_template
+from instructions_window import instructionsPage
 from send_emails import *
 
 DATA = []
@@ -41,6 +42,7 @@ class MyGui:
         self.menubar.add_cascade(menu=self.filemenu, label="File")
         self.helpmenu=tk.Menu(self.menubar, tearoff=0)
         self.helpmenu.add_command(label="About", command=lambda:helpPage(self))
+        self.helpmenu.add_command(label="Instructions", command=lambda:instructionsPage(self))
         self.menubar.add_cascade(menu=self.helpmenu, label="Help")
         self.root.config(menu=self.menubar)
 
@@ -81,7 +83,7 @@ class MyGui:
         # Binding templateText, so that body_template gets updated each time the text is modified
         templateText.bind('<<Modified>>', update_body_template)
 
-        # Function for loading a template
+        # Function for loading a template and updating the templateText widget
         def load_template():
             filename = askopenfilename()
             if filename:
@@ -194,7 +196,7 @@ class MyGui:
             displayabe_invoices.append(one_user_invoices)
         change_list(sums_listbox, displayabe_invoices)
 
-            # Function for loading a template
+    # Function for loading a Data from a file
     def load_data_from_file(self, names_listbox, emails_listbox, invoices_listbox):
             global DATA
             filename = askopenfilename()
@@ -217,8 +219,7 @@ class MyGui:
                 except FileNotFoundError:
                     print(f"File '{filename}' not found.")    
 
-
-
+# Update the content of ListBox widgets
 def change_list(list_widget, new_list):
     # Delete the current content for the ListBox widget
     list_widget.delete("0", "end")

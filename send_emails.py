@@ -1,5 +1,6 @@
 import win32com.client as win32
 
+# Code for sending emails using Outlook
 def send_emails(subjects, bodies, DATA):
         
         outlook = win32.Dispatch('Outlook.Application')
@@ -21,6 +22,7 @@ def send_emails(subjects, bodies, DATA):
     # TODO sending the email
            # mail.Send()
     
+# Code for preparing the emails
 def on_send_emails_button_click(self, DATA, BODY_TEMPLATE):
         # Create lists for email subjects and bodies with the same number of elements as the emails list
         subjects = ["Unpaid Invoice Notification" for i in range(len(DATA))]
