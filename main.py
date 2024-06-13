@@ -3,22 +3,18 @@ import win32com.client as win32
 from tkinter.filedialog import askopenfile, askopenfilename, asksaveasfile
 import tkinter as tk
 import pandas as pd
-from constants import *
 import pickle
+
+# Imports from project modules
+from constants import *
+from help import helpPage
+from helper_functions import load_default_template, save_default_template, save_list, save_template
+from send_emails import *
 
 DATA = []
 global BODY_TEMPLATE
 
-
 # The default template for the email is loaded from a file
-def load_default_template(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            return file.read()
-    except FileNotFoundError:
-        print(f"Template file {file_path} not found.")
-        return ""
-
 BODY_TEMPLATE = load_default_template(DEFAULT_TEMPLATE_FILE)
 
 # The user interface
@@ -44,7 +40,7 @@ class MyGui:
         self.filemenu.add_command(label="Exit", command=self.root.destroy)
         self.menubar.add_cascade(menu=self.filemenu, label="File")
         self.helpmenu=tk.Menu(self.menubar, tearoff=0)
-        self.helpmenu.add_command(label="About", command=self.helpPage)
+        self.helpmenu.add_command(label="About", command=lambda:helpPage(self))
         self.menubar.add_cascade(menu=self.helpmenu, label="Help")
         self.root.config(menu=self.menubar)
 
@@ -96,17 +92,6 @@ class MyGui:
                         templateText.insert("end", data)  # Insert new data
                 except FileNotFoundError:
                     print(f"File '{filename}' not found.")
-        def save_template():
-            file = asksaveasfile(initialfile="template")
-            displayable_body_template = ""
-            for sequence in BODY_TEMPLATE:
-                    if sequence == "$name":
-                        displayable_body_template = displayable_body_template + "$name"
-                    elif sequence == "$invoices":
-                        displayable_body_template = displayable_body_template + "$invoices"
-                    else:
-                        displayable_body_template = displayable_body_template+sequence
-            file.write(str(displayable_body_template))
         
         # Buttons for saving or loading templates
         buttonFrame = tk.Frame(self.root)
@@ -114,8 +99,8 @@ class MyGui:
         buttonFrame.columnconfigure(1,weight=1)
         buttonFrame.columnconfigure(2,weight=1)
 
-        saveButton = tk.Button(buttonFrame, text="Save Template", command=save_template)
-        saveAsDefaultButton = tk.Button(buttonFrame, text="Save as Default Template", command=self.save_default_template)
+        saveButton = tk.Button(buttonFrame, text="Save Template", command=lambda:save_template(BODY_TEMPLATE))
+        saveAsDefaultButton = tk.Button(buttonFrame, text="Save as Default Template", command=lambda:save_default_template(BODY_TEMPLATE))
         loadButton = tk.Button(buttonFrame, text="Load Template", command=load_template)
         saveButton.grid(row=0, column =0, sticky= tk.W+tk.E)
         saveAsDefaultButton.grid(row=0, column =1, sticky= tk.W+tk.E)
@@ -148,45 +133,15 @@ class MyGui:
         saveListFrame.columnconfigure(0, weight=1)
         saveListFrame.columnconfigure(1, weight=1)
 
-
-
-        saveListButton = tk.Button(saveListFrame, text="Save List", command=self.save_list)
+        saveListButton = tk.Button(saveListFrame, text="Save List", command=lambda:save_list(DATA))
         loadListButton = tk.Button(saveListFrame, text="Load List", command=lambda:self.load_data_from_file(namesListBox,emailsListBox,sumsListBox))
         saveListButton.grid(row=0, column =0, sticky= tk.W+tk.E)
         loadListButton.grid(row=0, column =1, sticky= tk.W+tk.E)
         saveListFrame.pack()
 
-
-
         # Button to send emails
-        sendEmailsButton = tk.Button(self.root, text="Send Emails", command=self.on_send_emails_button_click)
+        sendEmailsButton = tk.Button(self.root, text="Send Emails", command=lambda:on_send_emails_button_click(self, DATA, BODY_TEMPLATE))
         sendEmailsButton.pack()
-
-    
-    
-    def save_default_template(self):
-        file = open(DEFAULT_TEMPLATE_FILE, 'w')
-        file.writelines(BODY_TEMPLATE)
-
-    def save_list(self):
-        filename = simpledialog.askstring(title="Saving...",
-                                  prompt="Write a name for the file you want to save")
-
-        with open(filename, 'wb') as file:
-            pickle.dump(DATA, file)
-        
-    def helpPage(self):
-        # Create a tkinter window for "About" info
-        win=tk.Tk()
-        win.geometry(WINDOW_SIZE)
-        win.title(HELP_WINDOW_TITLE)
-        win.iconbitmap(HELP_ICON_PATH)
-
-        label = tk.Label(win, text= "About the app! ",font=('Arial bold', 18)).pack(pady=20)
-        label = tk.Label(win, text= "This app was created by dacian73 for the Code in Place 2024 final project.\nThe sourcecode is available at https://github.com/dacian73 ",font=('Arial', 12)).pack(pady=20)
-        #Make the window jump above all
-        win.attributes('-topmost',True)
-        win.mainloop()
 
     # Let the user upload an Excel file with columns for name, email
     def chooseFile(self, names_listbox, emails_listbox, sums_listbox): 
@@ -262,61 +217,14 @@ class MyGui:
                 except FileNotFoundError:
                     print(f"File '{filename}' not found.")    
 
-    def send_emails(self, subjects, bodies):
-        
-        outlook = win32.Dispatch('Outlook.Application')
-        for i in range(len(DATA)):
-            # for every record create an email
-            mail = outlook.CreateItem(0)
-            mail.To = DATA[i]["email"]
-            mail.Subject = subjects[i]
-            mail.Body = bodies[i]
 
-            print()
-            print("For the item number", i, "we have the following email")
-            print(DATA[i]["email"])
-            print()
-            print(subjects[i])
-            print()
-            print(bodies[i])
- 
-    # TODO sending the email
-           # mail.Send()
-    
-    def on_send_emails_button_click(self):
-        # Create lists for email subjects and bodies with the same number of elements as the emails list
-        subjects = ["Unpaid Invoice Notification" for i in range(len(DATA))]
-        bodies = ["" for i in range(len(DATA))]
 
-        # Populate the lists with subjects and bodies as needed
-        for i, client in enumerate(DATA):
-
-            # Create an email body using the template and replacing the name and invoice data where needed
-            body = ""
-            for sequence in BODY_TEMPLATE:
-                # We replace $name with the name of the client. We also cover the case when there is a comma, or something else attached to the end of the name
-                if sequence[:5] == "$name":
-                    remains = ""
-                    if len(sequence)>5:
-                        remains = sequence[5:]
-                    body = body + client["name"] + remains
-                elif sequence == "$invoices ":
-                    displayable_invoices = ""
-                    for invoice in client["invoices"]:
-                        displayable_invoices = displayable_invoices + "\nInvoice number " + str(invoice["invoice_id"]) + " for " + str(invoice["sum"]) + "$" + " with due date " + str(invoice["date"].date())
-                    body = body + displayable_invoices + " "
-                else:
-                    body = body+sequence
-            
-            bodies[i] = body
-        self.send_emails(subjects, bodies)
-
-def change_list(text_widget, new_text):
+def change_list(list_widget, new_list):
     # Delete the current content for the ListBox widget
-    text_widget.delete("0", "end")
+    list_widget.delete("0", "end")
     # Insert the new list for the ListBox widget
-    for word in new_text:
-        text_widget.insert('0', word)
+    for list in new_list:
+        list_widget.insert('0', list)
 
 
 def main():
