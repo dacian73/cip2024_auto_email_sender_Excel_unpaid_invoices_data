@@ -19,8 +19,8 @@ def send_emails(subjects, bodies, DATA):
             print()
             print(bodies[i])
  
-    # TODO sending the email
-           # mail.Send()
+    # sending the email
+            mail.Send()
     
 # Code for preparing the emails
 def on_send_emails_button_click(self, DATA, BODY_TEMPLATE):

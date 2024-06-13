@@ -2,7 +2,7 @@
 
 # Main window constants
 WINDOW_TITLE = "Email Sender App - CIP2024 Project"
-WINDOW_SIZE = "600x600"
+WINDOW_SIZE = "800x600"
 ICON_PATH = "icons\icon.ico"
 
 # Help window constants

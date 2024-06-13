@@ -128,6 +128,7 @@ class MyGui:
         namesListBox.grid(row=0, column =0, sticky= tk.W+tk.E)
         emailsListBox.grid(row=0, column =1, sticky= tk.W+tk.E)
         sumsListBox.grid(row=0, column =2, sticky= tk.W+tk.E)
+        sumsListBox.config(width=80)
         dataFrame.pack()
 
         # Buttons to save or load list
