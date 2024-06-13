@@ -3,17 +3,12 @@ import win32com.client as win32
 from tkinter.filedialog import askopenfile, askopenfilename, asksaveasfile
 import tkinter as tk
 import pandas as pd
+from constants import *
+import pickle
 
 DATA = []
 global BODY_TEMPLATE
 
-# Constants
-WINDOW_TITLE = "Email Sender App - CIP2024 Project"
-WINDOW_SIZE = "600x600"
-ICON_PATH = "icon.ico"
-DEFAULT_TEMPLATE_FILE = 'default_template'
-HELP_WINDOW_TITLE = "About the app"
-HELP_ICON_PATH = "about_icon.ico"
 
 # The default template for the email is loaded from a file
 def load_default_template(file_path):
@@ -153,8 +148,10 @@ class MyGui:
         saveListFrame.columnconfigure(0, weight=1)
         saveListFrame.columnconfigure(1, weight=1)
 
+
+
         saveListButton = tk.Button(saveListFrame, text="Save List", command=self.save_list)
-        loadListButton = tk.Button(saveListFrame, text="Load List", command=self.load_list)
+        loadListButton = tk.Button(saveListFrame, text="Load List", command=lambda:self.load_data_from_file(namesListBox,emailsListBox,sumsListBox))
         saveListButton.grid(row=0, column =0, sticky= tk.W+tk.E)
         loadListButton.grid(row=0, column =1, sticky= tk.W+tk.E)
         saveListFrame.pack()
@@ -174,13 +171,9 @@ class MyGui:
     def save_list(self):
         filename = simpledialog.askstring(title="Saving...",
                                   prompt="Write a name for the file you want to save")
-        file = open(filename, 'w')
-        file.writelines(DATA)
 
-    def load_list(self):
-        global DATA
-        file = open(DEFAULT_TEMPLATE_FILE, 'r')
-        DATA = file.read()
+        with open(filename, 'wb') as file:
+            pickle.dump(DATA, file)
         
     def helpPage(self):
         # Create a tkinter window for "About" info
@@ -194,29 +187,19 @@ class MyGui:
         #Make the window jump above all
         win.attributes('-topmost',True)
         win.mainloop()
-    
-
 
     # Let the user upload an Excel file with columns for name, email
     def chooseFile(self, names_listbox, emails_listbox, sums_listbox): 
         filename = askopenfile()
         print("We are attempting to read the file: \n", filename)
         print()
-
-        
         input_from_file = pd.read_excel(filename.name)
         print("Email list = ", input_from_file)
-
         client_ids = input_from_file['client id']
-
         invoice_ids = input_from_file['invoice id']
-
         sums = input_from_file['sum']
-
         dates = input_from_file['due date']
-
         names = input_from_file['name'].to_list()
-
         emails = input_from_file['email'].to_list()
         names_copy = []
 
@@ -256,7 +239,28 @@ class MyGui:
             displayabe_invoices.append(one_user_invoices)
         change_list(sums_listbox, displayabe_invoices)
 
-        
+            # Function for loading a template
+    def load_data_from_file(self, names_listbox, emails_listbox, invoices_listbox):
+            global DATA
+            filename = askopenfilename()
+            if filename:
+                try:
+                    with open(filename, 'rb') as file:
+                        DATA = pickle.load(file)
+                        invoices = [ value["invoices"] for value in DATA ]
+                        names = [ value["name"] for value in DATA ]
+                        emails = [ value["email"] for value in DATA ]
+                        change_list(names_listbox, names)
+                        change_list(emails_listbox, emails)
+                        displayabe_invoices = []
+                        for all_user_invoices in invoices:
+                            one_user_invoices = ""
+                            for invoice in all_user_invoices:
+                                one_user_invoices = one_user_invoices + "Invoice number " + str(invoice["invoice_id"]) + " for " + str(invoice["sum"]) + ". "
+                            displayabe_invoices.append(one_user_invoices)
+                        change_list(invoices_listbox, displayabe_invoices)
+                except FileNotFoundError:
+                    print(f"File '{filename}' not found.")    
 
     def send_emails(self, subjects, bodies):
         
