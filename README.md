@@ -10,7 +10,11 @@ The app will allow users to send personalized emails to a large list of recipien
 - **pickle**: For writing and reading from file the object that contains client data
 
 ## Input
-The user can choose an Excel file with columns named "name", "email", and "sum". The file can contain multiple rows, including multiple rows with the same "name" and "email", but with different invoice sums and dates.
+The user can choose an Excel file with columns named "client id", "name", "email", "invoice id", "sum", "due date". The file can contain multiple rows, including multiple rows with the same client, but with different invoices.
+
+The user can also save data from the app in a file and load it back another time.
+
+The app opens a default template from a file. The template can be edited and then saved by the user for later use.
 
 ## The GUI
  Please keep in mind that this was built by someone who just started learning python, in a short time, and it is a work in progress with the main goal being to learn.
@@ -50,14 +54,14 @@ data = [
 Explanation:
  - data is a list of dictionaries
     - Each dictionary inside the data variable contains the keys:
-        - "client_id" - String
-        - "name"  - String
-        - "email" - String
+        - "client_id"
+        - "name"
+        - "email"
         - "invoices" - list
             - The invoices list contains the details of each invoice from a client, the information being stored in a dictionary with the keys:
-                - "invoice_id" - String
-                - "sum" - String
-                - "date" - String
+                - "invoice_id"
+                - "sum"
+                - "date"
 
  There is a predefined email body that is shown on a Text widget. The email body is editable. The user can write whathever he wants and he can use $name in place of the client name. The email body is stored in a global variable called body_template
 
@@ -107,3 +111,4 @@ Explanation:
  - allow for custom email signature, that can be saved
  - make the number of columns dinamic, the user being able to decide what information he wants to use or see
  - give the user the option to write the names of the column headers he is interested in (instead of forcing him to use "name", "email", "invoice id" etc.)
+ - using a better logging system, instead of the many chaotic prints
