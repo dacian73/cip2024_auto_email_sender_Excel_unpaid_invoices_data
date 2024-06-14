@@ -21,17 +21,17 @@ The app opens a default template from a file. The template can be edited and the
 
  ### Starting the app
 
-![Alt text](screenshots\1.png?raw=true "At the start you can see the default template")
+![Alt text](https://github.com/dacian73/cip2024_auto_email_sender_Excel_unpaid_invoices_data/blob/main/screenshots/1.png?raw=true "At the start you can see the default template")
 
-![Alt text](screenshots\2.png?raw=true "The format of the excel file")
+![Alt text](https://github.com/dacian73/cip2024_auto_email_sender_Excel_unpaid_invoices_data/blob/main/screenshots/2.png?raw=true "The format of the excel file")
 
-![Alt text](screenshots\3.png?raw=true "After loading the data. You can see that users with multiple invoices only appear once, and their invoices appear in the last column.")
+![Alt text](https://github.com/dacian73/cip2024_auto_email_sender_Excel_unpaid_invoices_data/blob/main/screenshots/3.png?raw=true "After loading the data. You can see that users with multiple invoices only appear once, and their invoices appear in the last column.")
 
-![Alt text](screenshots\4.png?raw=true "Saving or loading a template or a list of invoices data")
+![Alt text](https://github.com/dacian73/cip2024_auto_email_sender_Excel_unpaid_invoices_data/blob/main/screenshots/4.png?raw=true "Saving or loading a template or a list of invoices data")
 
-![Alt text](screenshots\5.png?raw=true "Small menu with a few options")
+![Alt text](https://github.com/dacian73/cip2024_auto_email_sender_Excel_unpaid_invoices_data/blob/main/screenshots/5.png?raw=true "Small menu with a few options")
 
-![Alt text](screenshots\7.png?raw=true "The end result: An email sent from the app.")
+![Alt text](https://github.com/dacian73/cip2024_auto_email_sender_Excel_unpaid_invoices_data/blob/main/screenshots/7.png?raw=true "The end result: An email sent from the app.")
  
 
 ## How It Works
