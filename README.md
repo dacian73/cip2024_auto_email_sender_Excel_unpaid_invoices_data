@@ -13,7 +13,22 @@ The app will allow users to send personalized emails to a large list of recipien
 The user can choose an Excel file with columns named "name", "email", and "sum". The file can contain multiple rows, including multiple rows with the same "name" and "email", but with different invoice sums and dates.
 
 ## The GUI
-*...GUI description goes here...*
+ Please keep in mind that this was built by someone who just started learning python, in a short time, and it is a work in progress with the main goal being to learn.
+
+ ### Starting the app
+
+![Alt text](screenshots\1.png?raw=true "At the start you can see the default template")
+
+![Alt text](screenshots\2.png?raw=true "The format of the excel file")
+
+![Alt text](screenshots\3.png?raw=true "After loading the data. You can see that users with multiple invoices only appear once, and their invoices appear in the last column.")
+
+![Alt text](screenshots\4.png?raw=true "Saving or loading a template or a list of invoices data")
+
+![Alt text](screenshots\5.png?raw=true "Small menu with a few options")
+
+![Alt text](screenshots\7.png?raw=true "The end result: An email sent from the app.")
+ 
 
 ## How It Works
 The user needs to choose a file from which the app will import data and store it in a global variable called data.
